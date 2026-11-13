@@ -1,0 +1,90 @@
+system:
+  seed: 42
+  log_name: WHU_T
+  weight_dir_name: WHU_T
+  device_ids:
+  - 5
+  - 6
+  use_bf16: true
+data:
+  name: WHU
+  root_dir: ./dataset/WHU_split
+  batch_size: 8
+  num_workers: 16
+  pin_memory: false
+  calculate_stats: true
+model:
+  drop_rate: 0.0
+  drop_path_rate: 0.3
+  backbone: MLLA-T
+  pretrained_path: ./pretrain/MLLA-T.pth
+  x_num: 2
+  num_classes: 8
+  valid_classes: 7
+  ignore_index: 255
+phases:
+  phase1:
+    ema:
+      momentum: 0.999
+    scheduler:
+      total_epochs: 45
+      warmup_epochs: 10
+      use_warmup: true
+      use_lr_scheduler: true
+      save_start_epoch: 35
+    loss:
+      distill_temp: 4.0
+      main_weight: 0.6
+      aux_weight: 0.4
+      ce_weight: 1.0
+      kd_weight: 0.75
+    optimizer:
+      encode_lr: 0.0004
+      decode_lr: 0.0004
+      fuse_lr: 0.0004
+      distill_proj_lr: 0.0004
+      feature_adapter_lr: 0.0004
+      weight_decay: 0.0001
+  phase2:
+    scheduler:
+      total_epochs: 65
+      warmup_epochs: 10
+      use_warmup: true
+      use_lr_scheduler: true
+      save_start_epoch: 55
+    loss:
+      distill_temp: 4.0
+      main_weight: 0.6
+      aux_weight: 0.4
+      ce_weight: 1.0
+      kd_weight: 0.75
+      feature_weight: 0.25
+    optimizer:
+      encode_lr: 0.0004
+      decode_lr: 0.0004
+      fuse_lr: 0.0004
+      distill_proj_lr: 0.0004
+      feature_adapter_lr: 0.0004
+      weight_decay: 0.0001
+  phase3:
+    freeze_shallow: true
+    scheduler:
+      total_epochs: 50
+      warmup_epochs: 10
+      use_warmup: true
+      use_lr_scheduler: true
+      save_start_epoch: 40
+    loss:
+      distill_temp: 4.0
+      main_weight: 0.6
+      aux_weight: 0.4
+      ce_weight: 1.0
+      kd_weight: 0.75
+      feature_weight: 0.25
+    optimizer:
+      encode_lr: 0.0004
+      decode_lr: 0.0004
+      fuse_lr: 0.0004
+      distill_proj_lr: 0.0004
+      feature_adapter_lr: 0.0004
+      weight_decay: 0.0001
